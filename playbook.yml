@@ -1,0 +1,37 @@
+- hosts: aws_servers
+  become: yes
+  vars:
+    region: "us-east-1"
+  tasks:
+
+    - name: Configurer un VPN sur AWS
+      amazon.aws.ec2_vpn:
+        name: "my_vpn"
+        customer_gateway_id: "{{ customer_gateway_id }}"
+        vpn_gateway_id: "{{ vpn_gateway_id }}"
+        region: "{{ region }}"
+        state: present
+      register: vpn_config
+
+    - name: Configurer les règles du pare-feu (Security Group)
+      amazon.aws.ec2_group:
+        name: "my_security_group"
+        description: "Sécurité pour le VPN"
+        vpc_id: "{{ vpc_id }}"
+        region: "{{ region }}"
+        rules:
+          - proto: tcp
+            from_port: 22
+            to_port: 22
+            cidr_ip: 0.0.0.0/0
+          - proto: udp
+            from_port: 1194
+            to_port: 1194
+            cidr_ip: 0.0.0.0/0
+        state: present
+
+    - name: Attacher les règles de pare-feu au VPN
+      amazon.aws.ec2_vpc_vpn:
+        vpn_connection_id: "{{ vpn_config.vpn_connection_id }}"
+        security_group_id: "{{ security_group_id }}"
+        region: "{{ region }}"
