@@ -1,13 +1,14 @@
-- hosts: aws_servers
+- hosts: localhost
   become: yes
   vars:
     region: "eu-west-3"
+    vpn_gateway_id: "vgw-014a383fe65afc95b"           # Remplacez avec votre ID de passerelle VPN
+    vpc_id: "vpc-0a4775b6045ba5a28"                           # Remplacez avec votre ID de VPC
+    security_group_id: "sg-06b89aaeb3630b556"     # Remplacez avec votre ID de groupe de sécurité
   tasks:
-
     - name: Configurer un VPN sur AWS
       amazon.aws.ec2_vpn:
         name: "my_vpn"
-        customer_gateway_id: "{{ customer_gateway_id }}"
         vpn_gateway_id: "{{ vpn_gateway_id }}"
         region: "{{ region }}"
         state: present
@@ -35,3 +36,4 @@
         vpn_connection_id: "{{ vpn_config.vpn_connection_id }}"
         security_group_id: "{{ security_group_id }}"
         region: "{{ region }}"
+        state: present
